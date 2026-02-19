@@ -63,8 +63,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Absensi untuk karyawan ini pada tanggal tersebut sudah ada!';
         } else {
             // Update data absensi
-            $stmt = $conn->prepare("UPDATE absensi SET id_karyawan = ?, tanggal = ?, status = ?, keterangan = ? WHERE id_absensi = ?");
-            $stmt->bind_param("isssi", $id_karyawan, $tanggal, $status, $keterangan, $id_absensi);
+            $jam_masuk  = !empty($_POST['jam_masuk']) ? $_POST['jam_masuk'] : null;
+            $jam_pulang = !empty($_POST['jam_pulang']) ? $_POST['jam_pulang'] : null;
+
+            $diinput_oleh = $_SESSION['id_user']; // admin yang edit
+            $metode = 'manual'; // karena ini edit admin
+
+            $stmt = $conn->prepare("
+    UPDATE absensi 
+    SET id_karyawan = ?, 
+        tanggal = ?, 
+        status = ?, 
+        keterangan = ?, 
+        jam_masuk = ?, 
+        jam_pulang = ?, 
+        metode = ?, 
+        diinput_oleh = ?
+    WHERE id_absensi = ?
+");
+
+            $stmt->bind_param(
+                "issssssii",
+                $id_karyawan,
+                $tanggal,
+                $status,
+                $keterangan,
+                $jam_masuk,
+                $jam_pulang,
+                $metode,
+                $diinput_oleh,
+                $id_absensi
+            );
 
             if ($stmt->execute()) {
                 header("Location: index.php?success=edit");
@@ -173,6 +202,19 @@ closeConnection($conn);
                                 <label for="keterangan">Keterangan</label>
                                 <textarea id="keterangan" name="keterangan" rows="3" placeholder="Keterangan tambahan (opsional)"><?php echo htmlspecialchars($absensi['keterangan']); ?></textarea>
                             </div>
+
+                            <div class="form-group">
+                                <label for="jam_masuk">Jam Masuk</label>
+                                <input type="time" id="jam_masuk" name="jam_masuk"
+                                    value="<?php echo htmlspecialchars($absensi['jam_masuk']); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="jam_pulang">Jam Pulang</label>
+                                <input type="time" id="jam_pulang" name="jam_pulang"
+                                    value="<?php echo htmlspecialchars($absensi['jam_pulang']); ?>">
+                            </div>
+
 
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Update</button>

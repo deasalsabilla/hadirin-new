@@ -44,8 +44,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Absensi untuk karyawan ini pada tanggal tersebut sudah ada!';
         } else {
             // Insert data absensi
-            $stmt = $conn->prepare("INSERT INTO absensi (id_karyawan, tanggal, status, keterangan) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("isss", $id_karyawan, $tanggal, $status, $keterangan);
+            $jam_masuk  = !empty($_POST['jam_masuk']) ? $_POST['jam_masuk'] : null;
+            $jam_pulang = !empty($_POST['jam_pulang']) ? $_POST['jam_pulang'] : null;
+
+            $metode = 'manual';
+            $diinput_oleh = $_SESSION['id_user'];
+
+            $stmt = $conn->prepare("
+    INSERT INTO absensi 
+    (id_karyawan, tanggal, status, keterangan, jam_masuk, jam_pulang, metode, diinput_oleh)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+");
+
+            $stmt->bind_param(
+                "issssssi",
+                $id_karyawan,
+                $tanggal,
+                $status,
+                $keterangan,
+                $jam_masuk,
+                $jam_pulang,
+                $metode,
+                $diinput_oleh
+            );
 
             if ($stmt->execute()) {
                 header("Location: index.php?success=tambah");
@@ -165,6 +186,18 @@ closeConnection($conn);
                             <div class="form-group">
                                 <label for="keterangan"><i class="bi bi-chat-left-text"></i> Keterangan</label>
                                 <textarea id="keterangan" name="keterangan" class="form-control" rows="3" placeholder="Keterangan tambahan (opsional)"><?php echo isset($_POST['keterangan']) ? htmlspecialchars($_POST['keterangan']) : ''; ?></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="jam_masuk"><i class="bi bi-clock"></i> Jam Masuk</label>
+                                <input type="time" id="jam_masuk" name="jam_masuk" class="form-control"
+                                    value="<?php echo isset($_POST['jam_masuk']) ? htmlspecialchars($_POST['jam_masuk']) : ''; ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="jam_pulang"><i class="bi bi-clock-history"></i> Jam Pulang</label>
+                                <input type="time" id="jam_pulang" name="jam_pulang" class="form-control"
+                                    value="<?php echo isset($_POST['jam_pulang']) ? htmlspecialchars($_POST['jam_pulang']) : ''; ?>">
                             </div>
 
                             <div class="form-actions">

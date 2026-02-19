@@ -4,8 +4,21 @@ require_once 'config/koneksi.php';
 
 $conn = getConnection();
 
-// Ambil data menu
-$resultMenu = $conn->query("SELECT nama_menu, icon_menu, link_menu FROM data_menu WHERE status = 'aktif' ORDER BY urutan ASC");
+$id_role = $_SESSION['id_role'];
+
+$stmtMenu = $conn->prepare("
+    SELECT dm.nama_menu, dm.icon_menu, dm.link_menu
+    FROM data_menu dm
+    JOIN hak_akses ha ON dm.id_menu = ha.id_menu
+    WHERE ha.id_role = ?
+    AND ha.can_view = 1
+    AND dm.status = 'aktif'
+    ORDER BY dm.urutan ASC
+");
+
+$stmtMenu->bind_param("i", $id_role);
+$stmtMenu->execute();
+$resultMenu = $stmtMenu->get_result();
 
 // Ambil statistik
 $today = date('Y-m-d');

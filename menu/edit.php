@@ -36,10 +36,21 @@ if ($resultEdit->num_rows === 0) {
 
 $menuEdit = $resultEdit->fetch_assoc();
 
+$id_role = $_SESSION['id_role'];
 
-// Ambil data menu
-$resultMenu = $conn->query("SELECT nama_menu, icon_menu, link_menu FROM data_menu WHERE status = 'aktif' ORDER BY urutan ASC");
+$stmtMenu = $conn->prepare("
+    SELECT dm.nama_menu, dm.icon_menu, dm.link_menu
+    FROM data_menu dm
+    JOIN hak_akses ha ON dm.id_menu = ha.id_menu
+    WHERE ha.id_role = ?
+    AND ha.can_view = 1
+    AND dm.status = 'aktif'
+    ORDER BY dm.urutan ASC
+");
 
+$stmtMenu->bind_param("i", $id_role);
+$stmtMenu->execute();
+$resultMenu = $stmtMenu->get_result();
 
 // Proses update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

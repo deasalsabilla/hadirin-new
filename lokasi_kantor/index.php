@@ -122,7 +122,7 @@ closeConnection($conn);
                 <div class="card">
                     <div class="card-header">
                         <h2><i class="bi bi-geo-alt-fill"></i> Data Lokasi Kantor</h2>
-                        <a href="edit.php" class="btn btn-primary">
+                        <a href="edit.php?id=<?php echo $lokasi['id_lokasi']; ?>" class="btn btn-primary">
                             <i class="bi bi-pencil-square"></i> Edit Lokasi
                         </a>
                     </div>
